@@ -75,7 +75,7 @@ jobs:
                       z.write(p, p.relative_to(source).as_posix())
           with zipfile.ZipFile(destination) as z:
               assert "pack.mcmeta" in z.namelist()
-              assert len(z.namelist()) == 8, z.namelist()
+              assert len(z.namelist()) == 7, z.namelist()
           print("Verified Forge JAR:", jars[0], "and standalone resource pack:", destination)
           PY
 
