@@ -2,7 +2,7 @@ package dev.whiteenderman;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SpawnEggItem;
@@ -21,9 +21,9 @@ public final class WhiteEndermanMod {
     private static final DeferredRegister<EntityType<?>> ENTITIES =
             DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, MOD_ID);
 
-    public static final RegistryObject<EntityType<EnderMan>> WHITE_ENDERMAN =
+    public static final RegistryObject<EntityType<Enderman>> WHITE_ENDERMAN =
             ENTITIES.register("white_enderman", () ->
-                    EntityType.Builder.of(EnderMan::new, MobCategory.MONSTER)
+                    EntityType.Builder.of(Enderman::new, MobCategory.MONSTER)
                             .sized(0.6F, 2.9F)
                             .clientTrackingRange(8)
                             .build(ENTITIES.key("white_enderman")));
@@ -43,7 +43,7 @@ public final class WhiteEndermanMod {
         ITEMS.register(group);
 
         EntityAttributeCreationEvent.BUS.addListener(event ->
-                event.put(WHITE_ENDERMAN.get(), EnderMan.createAttributes().build()));
+                event.put(WHITE_ENDERMAN.get(), Enderman.createAttributes().build()));
 
         BuildCreativeModeTabContentsEvent.BUS.addListener(event -> {
             if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
