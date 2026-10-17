@@ -1,0 +1,7 @@
+{
+  "pack": {
+    "description": "Forge Visual Shaders — native Minecraft 26.3 post effects",
+    "min_format": [97, 1],
+    "max_format": [97, 1]
+  }
+}
