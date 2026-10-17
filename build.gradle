@@ -1,0 +1,48 @@
+// Adapted from the official Forge 26.3 MDK template.
+// https://github.com/MinecraftForge/MinecraftForge/tree/26.3/forge-mdk/template
+plugins {
+    id 'java'
+    id 'idea'
+    id 'eclipse'
+    id 'net.minecraftforge.gradle' version '[7.0.17,8)'
+}
+
+version = '1.0.0'
+group = 'dev.forgebuildcheck'
+base.archivesName = 'forgebuildcheck'
+
+// Minecraft 26.3 and Forge 66 use Java 25.
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+minecraft {
+    runs {
+        configureEach {
+            workingDir = layout.projectDirectory.dir('run')
+            systemProperty 'eventbus.api.strictRuntimeChecks', 'true'
+            systemProperty 'forge.enabledGameTestNamespaces', 'forgebuildcheck'
+        }
+        register('client')
+        register('server') {
+            args '--nogui'
+        }
+        register('gameTestServer')
+    }
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
+}
+
+dependencies {
+    implementation minecraft.dependency('net.minecraftforge:forge:26.3-66.0.12')
+    annotationProcessor 'net.minecraftforge:eventbus-validator:7.0.6'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
