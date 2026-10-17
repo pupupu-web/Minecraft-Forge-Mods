@@ -1,0 +1,96 @@
+name: Build Forge Visual Shaders 26.3
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mods/forge-visual-shaders/**'
+      - '.github/workflows/build-forge-visual-shaders.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'mods/forge-visual-shaders/**'
+      - '.github/workflows/build-forge-visual-shaders.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - name: Set up Java 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '9.7.1'
+
+      - name: Compile Forge Visual Shaders
+        working-directory: mods/forge-visual-shaders
+        run: gradle --no-daemon build
+
+      - name: Verify compiled mod and prepare resource pack
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, zipfile
+          from pathlib import Path
+          root = Path("mods/forge-visual-shaders")
+          source = root / "src/main/resources"
+          jars = list((root / "build/libs").glob("forge-visual-shaders-*.jar"))
+          assert len(jars) == 1, f"Expected one JAR, found {jars}"
+          prefix = "assets/forgevisuals/"
+          shaders = ("cinematic", "vibrant", "soft_glow")
+          with zipfile.ZipFile(jars[0]) as jar:
+              entries = set(jar.namelist())
+              required = {"pack.mcmeta", "META-INF/mods.toml", "dev/forgevisuals/ForgeVisualShadersMod.class"}
+              for name in shaders:
+                  required.add(prefix + f"post_effect/{name}.json")
+                  required.add(prefix + f"shaders/post/{name}.fsh")
+              missing = required - entries
+              assert not missing, f"Missing JAR entries: {missing}"
+              pack = json.loads(jar.read("pack.mcmeta"))
+              assert pack["pack"]["min_format"] == [97, 1]
+              for name in shaders:
+                  effect = json.loads(jar.read(prefix + f"post_effect/{name}.json"))
+                  assert len(effect["passes"]) == 2
+                  assert effect["passes"][0]["fragment_shader"] == f"forgevisuals:post/{name}"
+                  assert effect["passes"][0]["inputs"][0]["target"] == "minecraft:main"
+                  assert effect["passes"][1]["output"] == "minecraft:main"
+          destination = root / "build/ForgeVisualShaders-26.3-resourcepack.zip"
+          with zipfile.ZipFile(destination, "w", zipfile.ZIP_DEFLATED) as z:
+              z.write(source / "pack.mcmeta", "pack.mcmeta")
+              for p in sorted((source / "assets").rglob("*")):
+                  if p.is_file():
+                      z.write(p, p.relative_to(source).as_posix())
+          with zipfile.ZipFile(destination) as z:
+              assert "pack.mcmeta" in z.namelist()
+              assert len(z.namelist()) == 7, z.namelist()
+          print("Verified Forge JAR:", jars[0], "and standalone resource pack:", destination)
+          PY
+
+      - name: Upload Forge mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: ForgeVisualShaders-26.3
+          path: mods/forge-visual-shaders/build/libs/forge-visual-shaders-*.jar
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload standalone resource pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: ForgeVisualShaders-26.3-ResourcePack
+          path: mods/forge-visual-shaders/build/ForgeVisualShaders-26.3-resourcepack.zip
+          if-no-files-found: error
+          retention-days: 14

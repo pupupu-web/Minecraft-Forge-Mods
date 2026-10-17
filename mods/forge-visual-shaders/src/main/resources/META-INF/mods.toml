@@ -1,0 +1,24 @@
+modLoader="javafml"
+loaderVersion="[66,)"
+license="MIT"
+clientSideOnly=true
+
+[[mods]]
+modId="forgevisuals"
+version="0.1.0"
+displayName="Forge Visual Shaders"
+description='''Native Minecraft 26.3 post effects for Forge: cinematic tone, vivid color and gentle screen-space glow. Not an Iris/OptiFine shaderpack loader.'''
+
+[[dependencies.forgevisuals]]
+modId="forge"
+mandatory=true
+versionRange="[66,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.forgevisuals]]
+modId="minecraft"
+mandatory=true
+versionRange="[26.3,26.4)"
+ordering="NONE"
+side="BOTH"
