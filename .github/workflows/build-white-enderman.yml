@@ -6,6 +6,11 @@ on:
     paths:
       - 'mods/white-enderman/**'
       - '.github/workflows/build-white-enderman.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'mods/white-enderman/**'
+      - '.github/workflows/build-white-enderman.yml'
   workflow_dispatch:
 
 permissions:
