@@ -1,0 +1,24 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="MIT"
+
+[[mods]]
+modId="cozybeds"
+version="0.1.0"
+displayName="Cozy Beds"
+authors="pupupu-web"
+description='''Tuck sleeping players and villagers under cozy 3D bedcovers matched to each vanilla bed color.'''
+
+[[dependencies.cozybeds]]
+modId="neoforge"
+type="required"
+versionRange="[26.3.0.90,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.cozybeds]]
+modId="minecraft"
+type="required"
+versionRange="[26.3]"
+ordering="NONE"
+side="BOTH"
