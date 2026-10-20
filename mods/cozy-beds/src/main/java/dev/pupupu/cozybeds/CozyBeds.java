@@ -14,7 +14,7 @@ import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.BedBlock;
@@ -64,7 +64,7 @@ public final class CozyBeds {
         List<Sleeper> sleepers = new ArrayList<>();
         for (Entity entity : level.getAllEntities()) {
             if (entity instanceof Display.BlockDisplay display
-                    && display.getTags().contains(ROOT_TAG)) {
+                    && display.getPersistentData().getBooleanOr(ROOT_TAG, false)) {
                 oldDisplays.add(display);
             } else if ((entity instanceof Player || entity instanceof Villager)
                     && entity instanceof LivingEntity living && living.isSleeping()) {
@@ -103,17 +103,18 @@ public final class CozyBeds {
     private static void ensureLayer(ServerLevel level, Sleeper sleeper, String part,
                                     List<Display.BlockDisplay> existing,
                                     Set<Display.BlockDisplay> retained) {
-        String ownerTag = "cb_owner_" + sleeper.owner;
-        String bedTag = "cb_bed_" + sleeper.head.asLong();
-        String colorTag = "cb_color_" + sleeper.color.getSerializedName();
-        String partTag = "cb_part_" + part;
+        String ownerTag = sleeper.owner;
+        long bedTag = sleeper.head.asLong();
+        String colorTag = sleeper.color.getSerializedName();
+        String partTag = part;
 
         // Reuse saved display entities. This prevents duplicates on server restart.
         for (Display.BlockDisplay display : existing) {
-            Set<String> tags = display.getTags();
-            if (!retained.contains(display) && tags.contains(ownerTag)
-                    && tags.contains(bedTag) && tags.contains(colorTag)
-                    && tags.contains(partTag)) {
+            CompoundTag tags = display.getPersistentData();
+            if (!retained.contains(display) && ownerTag.equals(tags.getStringOr("cb_owner", ""))
+                    && bedTag == tags.getLongOr("cb_bed", Long.MIN_VALUE)
+                    && colorTag.equals(tags.getStringOr("cb_color", ""))
+                    && partTag.equals(tags.getStringOr("cb_part", ""))) {
                 retained.add(display);
                 return;
             }
@@ -135,7 +136,7 @@ public final class CozyBeds {
             sz = axisX ? .78f : .34f;
             sy = .105f;
             height = .575f;
-            block = Blocks.WHITE_WOOL;
+            block = Blocks.WOOL.white();
         } else {
             centerX = sleeper.foot.getX() + .5 + sleeper.facing.getStepX() * .21;
             centerZ = sleeper.foot.getZ() + .5 + sleeper.facing.getStepZ() * .21;
@@ -147,7 +148,7 @@ public final class CozyBeds {
                 sz = axisX ? .93f : .09f;
                 sy = .025f;
                 height = .922f;
-                block = Blocks.WHITE_WOOL;
+                block = Blocks.WOOL.white();
             } else {
                 sx = axisX ? 1.38f : .93f;
                 sz = axisX ? .93f : 1.38f;
@@ -172,33 +173,17 @@ public final class CozyBeds {
         nbt.putFloat("height", 1.5f);
         display.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), nbt));
         display.setPos(x, y, z);
-        display.addTag(ROOT_TAG);
-        display.addTag(ownerTag);
-        display.addTag(bedTag);
-        display.addTag(colorTag);
-        display.addTag(partTag);
+        CompoundTag data = display.getPersistentData();
+        data.putBoolean(ROOT_TAG, true);
+        data.putString("cb_owner", ownerTag);
+        data.putLong("cb_bed", bedTag);
+        data.putString("cb_color", colorTag);
+        data.putString("cb_part", partTag);
         level.addFreshEntity(display);
     }
 
     private static Block wool(DyeColor color) {
-        return switch (color) {
-            case WHITE -> Blocks.WHITE_WOOL;
-            case ORANGE -> Blocks.ORANGE_WOOL;
-            case MAGENTA -> Blocks.MAGENTA_WOOL;
-            case LIGHT_BLUE -> Blocks.LIGHT_BLUE_WOOL;
-            case YELLOW -> Blocks.YELLOW_WOOL;
-            case LIME -> Blocks.LIME_WOOL;
-            case PINK -> Blocks.PINK_WOOL;
-            case GRAY -> Blocks.GRAY_WOOL;
-            case LIGHT_GRAY -> Blocks.LIGHT_GRAY_WOOL;
-            case CYAN -> Blocks.CYAN_WOOL;
-            case PURPLE -> Blocks.PURPLE_WOOL;
-            case BLUE -> Blocks.BLUE_WOOL;
-            case BROWN -> Blocks.BROWN_WOOL;
-            case GREEN -> Blocks.GREEN_WOOL;
-            case RED -> Blocks.RED_WOOL;
-            case BLACK -> Blocks.BLACK_WOOL;
-        };
+        return Blocks.WOOL.pick(color);
     }
 
     private record Sleeper(String owner, BlockPos head, BlockPos foot,
