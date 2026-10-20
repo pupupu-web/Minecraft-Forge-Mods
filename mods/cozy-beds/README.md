@@ -1,44 +1,28 @@
-# Cozy Beds — NeoForge 26.3
+# Cozy Beds 0.2.0 — NeoForge 26.3
 
-**Version 0.1.0 (initial proof of concept)**
+An actual client-side bedcover renderer instead of the crude 0.1.0 stretched wool blocks.
 
-A vanilla-style solution to the awkward appearance of Minecraft sleeping poses.
+## What changed
+- Replaces **all block-display spawning** with baked 3D entity-model render layers.
+- Draws a 3-part, subtly sculpted, 1–3-pixel-thick blanket and a narrow white folded top edge.
+- Adds a flat, softly textured pillow. No new collision boxes and no placement items.
+- Matches the vanilla **16 bed colors** by tinting a single handmade pixel-art fabric texture.
+- Hides sleeping player/villager torso, limbs, and selected clothing model parts using NeoForge's official render-state modifiers, leaving the head visible.
+- Aligns with vanilla entity sleeping rotation (all four bed directions).
+- Cats remain untouched.
+- Removes older v0.1.0 spawned displays from loaded worlds, using their old unique persistent tag.
 
-### What happens
-- When a **player or villager** sleeps in a normal colored bed, a low-profile wool-textured quilt, a folded white cuff and a 3D white pillow appear.
-- The quilt matches **all 16 vanilla bed colors**.
-- The additions are `block_display` entities without block collisions and vanish when the sleeper wakes up.
-- Bed orientation and sleeping facing are detected automatically.
-- Decorative displays are reused or cleaned up after world reloads, so there should not be duplicates.
-- Sleeping cats are left alone by the mod's logic; they are not made invisible or moved.
+## Important compatibility notes
+This uses **NeoForge 26.3's entity render layer API**, not renderer mixins or invasive block model replacement.
+Minecraft 26.3, Java 25 and NeoForge 26.3.0.90 are required.
+The mod must be installed on server and client (legacy display cleanup runs server side).
+The hiding modifier is client-only; gameplay and sleep position are unchanged.
 
-### Limitations
-- Initial implementation uses simple cuboid Minecraft wool textures, not a custom curved animated blanket or a full bed remesh.
-- Player/villager bodies are covered rather than relocated or hidden; some armor or poses may clip through the blanket.
-- Added pillow is shown **while occupied** only.
-- Straw beds and modded bed types are not yet supported.
-- On multiplayer servers, install on both server and clients (NeoForge mod).
-- Needs in-game visual testing; a successful Java build does not guarantee ideal clipping with every skin, armor or mod.
+## Limitations / testing
+The render geometry is newly built and the JAR is compiled in CI, but **visual placement still requires an actual Minecraft client test**.
+Different armor models, sleeping villager clothes, shaders and first-person sleeping camera may need adjustment.
+Model-part override behavior varies with other custom entity renderers.
 
-### Build
-This is an **independent Gradle project**, not part of the Forge build at the repository root.
-
-```bash
-cd mods/cozy-beds
-gradle --no-daemon build
-```
-
-Use **Java 25** and **Gradle 9.2.1**, targeting **Minecraft 26.3 / NeoForge 26.3.0.90**.
-
-### GitHub Actions
-Run the **Cozy Beds / NeoForge 26.3** workflow or push changes to this directory.
-Then download its `CozyBeds-NeoForge-26.3` build artifact, unzip it, and put the JAR in the Minecraft `mods` folder.
-
-### Testing checklist
-1. Sleep on a red bed and a blue bed, including all four compass orientations.
-2. Watch another player in multiplayer while sleeping.
-3. Watch a villager sleep in a village.
-4. Test an armored player and a cat sharing a bed; check clipping.
-5. Wake, break the bed, restart the world and revisit the area; decorations should disappear/reuse correctly.
-
-This version intentionally avoids invasive renderer mixins to reduce risk of crashing Sodium or Iris.
+## Build
+Inside `mods/cozy-beds` run `gradle --no-daemon build` with Java 25 and Gradle 9.2.1.
+Or download the automatically produced JAR from the [Cozy Beds GitHub Actions build](https://github.com/pupupu-web/Minecraft-Forge-Mods/actions/workflows/build-cozy-beds.yml).

@@ -28,11 +28,11 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.2.1'
-      - name: Compile the NeoForge mod
+      - name: Build Cozy Beds 0.2
         run: gradle --no-daemon clean build --stacktrace
-      - name: Upload runnable mod JAR
+      - name: Upload runnable JAR
         uses: actions/upload-artifact@v4
         with:
-          name: CozyBeds-NeoForge-26.3
-          path: mods/cozy-beds/build/libs/CozyBeds-NeoForge-26.3-0.1.0.jar
+          name: CozyBeds-NeoForge-26.3-v0.2
+          path: mods/cozy-beds/build/libs/CozyBeds-NeoForge-26.3-0.2.0.jar
           if-no-files-found: error

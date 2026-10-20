@@ -4,10 +4,10 @@ license="MIT"
 
 [[mods]]
 modId="cozybeds"
-version="0.1.0"
+version="0.2.0"
 displayName="Cozy Beds"
 authors="pupupu-web"
-description='''Tuck sleeping players and villagers under cozy 3D bedcovers matched to each vanilla bed color.'''
+description='''Thin sculpted quilts and pillows for sleeping players and villagers, in all 16 bed colors.'''
 
 [[dependencies.cozybeds]]
 modId="neoforge"
