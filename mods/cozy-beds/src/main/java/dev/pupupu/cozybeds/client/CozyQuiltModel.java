@@ -10,12 +10,13 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 
 /**
- * Sculpted in 1/16-block pixels in the same local coordinate system as the
- * sleeping humanoid. The vanilla sleeping transform rotates the quilt with
- * the sleeper, keeping it aligned to all bed orientations.
+ * Minecraft-style quilt panels, authored directly in 1/16-block units.
+ * Axis X: left/right bed width (14 pixels instead of bed's full 16).
+ * Axis Y: small elevation above existing vanilla mattress.
+ * Axis Z: travel from head-center toward bed foot (5.5px to 23.4px).
  *
- * Unlike the old 0.1.0 version, no full-block geometry is involved:
- * the fabric thickness is between 1.2 and 3.0 model pixels.
+ * The additional cushion from version 0.2.0 was removed, because a vanilla
+ * bed already has a pillow: that extra cube intersected the sleeper's head.
  */
 public final class CozyQuiltModel extends EntityModel<LivingEntityRenderState> {
     public CozyQuiltModel(ModelPart root) {
@@ -26,35 +27,48 @@ public final class CozyQuiltModel extends EntityModel<LivingEntityRenderState> {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
 
-        // Gently raised around the torso, flatter toward the feet.
-        root.addOrReplaceChild("bottom",
+        // Continuous thin sheet: the surrounding mattress remains visible.
+        root.addOrReplaceChild("blanket",
                 CubeListBuilder.create().texOffs(0, 0)
-                        .addBox(-1.0f, -8.0f, -7.2f, 2.0f, 8.5f, 14.4f),
+                        .addBox(-7.05F, 0.45F, 5.55F, 14.10F, 1.35F, 17.90F),
+                PartPose.ZERO);
+        // Gentle silhouette of a covered torso, tapering toward the feet.
+        root.addOrReplaceChild("chest",
+                CubeListBuilder.create().texOffs(0, 23)
+                        .addBox(-6.93F, 1.77F, 6.8F, 13.86F, 1.27F, 4.6F),
                 PartPose.ZERO);
         root.addOrReplaceChild("middle",
-                CubeListBuilder.create().texOffs(0, 23)
-                        .addBox(-1.55f, -15.5f, -7.3f, 3.1f, 7.5f, 14.6f),
-                PartPose.ZERO);
-        root.addOrReplaceChild("chest",
-                CubeListBuilder.create().texOffs(0, 43)
-                        .addBox(-1.3f, -19.2f, -7.35f, 2.6f, 3.7f, 14.7f),
+                CubeListBuilder.create().texOffs(0, 41)
+                        .addBox(-6.93F, 1.75F, 11.4F, 13.86F, 0.68F, 5.7F),
                 PartPose.ZERO);
         return LayerDefinition.create(mesh, 64, 64);
     }
 
-    public static LayerDefinition makeLinen() {
+    public static LayerDefinition makeFold() {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
-
-        // Folded white edge, at the head end of the duvet.
-        root.addOrReplaceChild("fold",
-                CubeListBuilder.create().texOffs(0, 0)
-                        .addBox(-1.40f, -19.4f, -7.45f, 2.8f, 1.3f, 14.9f),
+        root.addOrReplaceChild("folded_edge",
+                CubeListBuilder.create().texOffs(0, 2)
+                        .addBox(-7.12F, 1.75F, 5.6F, 14.24F, 1.08F, 1.05F),
                 PartPose.ZERO);
-        // A separate slim cushion. The head of the sleeper remains uncovered.
-        root.addOrReplaceChild("pillow",
-                CubeListBuilder.create().texOffs(0, 20)
-                        .addBox(-1.9f, -25.1f, -6.1f, 3.8f, 3.1f, 12.2f),
+        return LayerDefinition.create(mesh, 64, 64);
+    }
+
+    public static LayerDefinition makeStitch() {
+        MeshDefinition mesh = new MeshDefinition();
+        PartDefinition root = mesh.getRoot();
+        // Fine dark piping to distinguish a white quilt from a white mattress.
+        root.addOrReplaceChild("seam_left",
+                CubeListBuilder.create().texOffs(0, 10)
+                        .addBox(-7.10F, 1.79F, 6.65F, 0.31F, 0.12F, 16.7F),
+                PartPose.ZERO);
+        root.addOrReplaceChild("seam_right",
+                CubeListBuilder.create().texOffs(0, 10)
+                        .addBox(6.79F, 1.79F, 6.65F, 0.31F, 0.12F, 16.7F),
+                PartPose.ZERO);
+        root.addOrReplaceChild("seam_foot",
+                CubeListBuilder.create().texOffs(0, 0)
+                        .addBox(-7.1F, 1.80F, 23.2F, 14.2F, 0.10F, 0.3F),
                 PartPose.ZERO);
         return LayerDefinition.create(mesh, 64, 64);
     }
